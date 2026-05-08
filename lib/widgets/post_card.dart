@@ -344,7 +344,8 @@ class _PostCardState extends State<PostCard>
               onDoubleTap: _handleDoubleTap,
               onTap: () {
                 if (widget.post.isVideo) {
-                  _toggleVideoPlay();
+                  // Navigate to full video screen
+                  context.push('/video-feed', extra: widget.post.id);
                 } else {
                   context.push('/post-details', extra: widget.post);
                 }
@@ -355,11 +356,14 @@ class _PostCardState extends State<PostCard>
                 decoration: BoxDecoration(
                   color: colors.background,
                 ),
+                // Ensure fixed constraints to prevent jumps
                 constraints: BoxConstraints(
+                  minHeight: 200,
                   maxHeight: MediaQuery.of(context).size.height * 0.7,
                 ),
                 child: Stack(
                   alignment: Alignment.center,
+                  fit: StackFit.passthrough, // Ensure stack doesn't collapse/expand unexpectedly
                   children: [
                     widget.post.isVideo
                         ? VisibilityDetector(
@@ -387,7 +391,7 @@ class _PostCardState extends State<PostCard>
                                                 child: Container(
                                                   padding: const EdgeInsets.all(16),
                                                   decoration: BoxDecoration(
-                                                    color: Colors.black26,
+                                                    color: Colors.black.withOpacity(0.3),
                                                     shape: BoxShape.circle,
                                                   ),
                                                   child: Icon(
@@ -529,8 +533,10 @@ class _PostCardState extends State<PostCard>
                         ),
                       ),
 
-                    // Flying Hearts Animation Overlay
-                    FlyingHeartsOverlay(visible: _showHeartOverlay),
+                    // Flying Hearts Animation Overlay - Wrap with IgnorePointer to prevent layout shifts
+                    IgnorePointer(
+                      child: FlyingHeartsOverlay(visible: _showHeartOverlay),
+                    ),
                   ],
                 ),
               ),

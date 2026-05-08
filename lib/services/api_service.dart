@@ -9,32 +9,16 @@ import 'package:flutter/foundation.dart';
 class ApiService {
   // 📝 ادخل عنوان الـ IP الخاص بجهاز الكمبيوتر هنا (مثلاً 192.168.1.5)
   // يمكنك معرفته من خلال كتابة 'ipconfig' في الـ Terminal الخاص بالكمبيوتر
-  static const String hostIp = '192.168.100.9'; 
+  static const String productionUrl = 'https://let-flpx.onrender.com';
 
-  static String get baseUrl {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return 'http://$hostIp:3000/api';
-    } else {
-      return 'http://localhost:3000/api';
-    }
-  }
+  static String get baseUrl => '$productionUrl/api';
 
-  static String get baseMediaUrl {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return 'http://$hostIp:3000';
-    } else {
-      return 'http://localhost:3000';
-    }
-  }
+  static String get baseMediaUrl => productionUrl;
 
   static String? getImageUrl(String? url) {
     if (url == null || url.isEmpty) return null;
 
     if (url.startsWith('http')) {
-      // If the URL already contains the wrong hostIp format, fix it
-      if (url.contains('$hostIp-3000')) {
-        return url.replaceFirst('$hostIp-3000', '$hostIp:3000');
-      }
       return url;
     }
 

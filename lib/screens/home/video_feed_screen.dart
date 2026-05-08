@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../widgets/comments_bottom_sheet.dart';
 import '../../providers/music_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/flying_hearts.dart';
 
 class VideoFeedScreen extends StatefulWidget {
   final String? initialVideoPostId;
@@ -172,6 +173,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> with WidgetsBindingOb
   bool _isRoutePushed = false;
   bool _isVisibleEnough = false;
   bool _isManuallyPaused = false;
+  bool _showHeartOverlay = false;
 
   @override
   void initState() {
@@ -294,6 +296,14 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> with WidgetsBindingOb
               }
             },
             child: GestureDetector(
+              onDoubleTap: () {
+                // Like the post on double tap
+                Provider.of<PostProvider>(context, listen: false).likePost(widget.post.id);
+                setState(() => _showHeartOverlay = true);
+                Future.delayed(const Duration(milliseconds: 1000), () {
+                  if (mounted) setState(() => _showHeartOverlay = false);
+                });
+              },
               onTap: () {
                 if (_controller.value.isPlaying) {
                   _controller.pause();
@@ -312,13 +322,23 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> with WidgetsBindingOb
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(40),
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
-                    ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: _controller.value.size.width,
+                          height: _controller.value.size.height,
+                          child: VideoPlayer(_controller),
+                        ),
+                      ),
+                      // Heart animation overlay
+                      if (_showHeartOverlay)
+                        const IgnorePointer(
+                          child: FlyingHeartsOverlay(visible: true),
+                        ),
+                    ],
                   ),
                 ),
               ),
