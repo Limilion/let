@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class CustomInput extends StatelessWidget {
   final String placeholder;
@@ -10,8 +11,10 @@ class CustomInput extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
   final Function(String)? onChanged;
-  final bool isFocused;
   final FocusNode? focusNode;
+  final TextInputAction textInputAction;
+  final String? errorText;
+  final TextDirection? textDirection;
 
   const CustomInput({
     super.key,
@@ -24,68 +27,75 @@ class CustomInput extends StatelessWidget {
     this.validator,
     this.keyboardType = TextInputType.text,
     this.onChanged,
-    this.isFocused = false,
     this.focusNode,
+    this.textInputAction = TextInputAction.next,
+    this.errorText,
+    this.textDirection,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final colors = Theme.of(context).extension<CustomColors>()!;
 
-    return Container(
-      height: 54,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A1A1A) : const Color(0xFFFCFCFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isFocused ? theme.primaryColor : theme.dividerColor,
-          width: isFocused ? 2.0 : 1.5,
-        ),
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      obscureText: isPassword && !showPassword,
+      keyboardType: keyboardType,
+      onChanged: onChanged,
+      validator: validator,
+      textInputAction: textInputAction,
+      textDirection: textDirection,
+      style: TextStyle(
+        color: colors.text,
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: isFocused ? theme.primaryColor : theme.hintColor,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextFormField(
-              controller: controller,
-              focusNode: focusNode,
-              obscureText: isPassword && !showPassword,
-              keyboardType: keyboardType,
-              onChanged: onChanged,
-              validator: validator,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: theme.textTheme.bodyLarge?.color,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-              decoration: InputDecoration(
-                hintText: placeholder,
-                hintStyle: TextStyle(
-                  color: theme.hintColor.withValues(alpha: 0.5),
+      decoration: InputDecoration(
+        hintText: placeholder,
+        hintStyle: TextStyle(
+          color: colors.textSecondary.withValues(alpha: 0.6),
+          fontSize: 14,
+        ),
+        errorText: errorText,
+        prefixIcon: Icon(icon, size: 22),
+        suffixIcon: isPassword
+            ? IconButton(
+                onPressed: onTogglePassword,
+                icon: Icon(
+                  showPassword
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
+                  size: 22,
                 ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-          if (isPassword)
-            IconButton(
-              onPressed: onTogglePassword,
-              icon: Icon(
-                showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                size: 20,
-                color: theme.hintColor,
-              ),
-            ),
-        ],
+              )
+            : null,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
+        ),
+        filled: true,
+        fillColor: colors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          borderSide: BorderSide(color: colors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          borderSide: BorderSide(color: colors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          borderSide: BorderSide(color: colors.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          borderSide: BorderSide(color: colors.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          borderSide: BorderSide(color: colors.error, width: 1.5),
+        ),
       ),
     );
   }

@@ -27,7 +27,19 @@ export class AuthService {
       }
     });
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
-    return { id: user.id, name: user.name, username: user.username, email: user.email, photo: user.photo, token };
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      photo: user.photo,
+      coverPhoto: user.coverPhoto,
+      bio: user.bio,
+      profileLinks: user.profileLinks,
+      tags: user.tags,
+      musicTrack: user.musicTrack,
+      token,
+    };
   }
 
   async login(login_id: string, password: string) {
@@ -42,7 +54,19 @@ export class AuthService {
       throw new UnauthorizedException('كلمة المرور غير صحيحة');
     }
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
-    return { id: user.id, name: user.name, username: user.username, email: user.email, photo: user.photo, token };
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      photo: user.photo,
+      coverPhoto: user.coverPhoto,
+      bio: user.bio,
+      profileLinks: user.profileLinks,
+      tags: user.tags,
+      musicTrack: user.musicTrack,
+      token,
+    };
   }
 
   async updateProfile(data: any) {
@@ -51,6 +75,49 @@ export class AuthService {
       where: { id: parseInt(user_id) },
       data: { name, bio, phone, photo }
     });
-    return { id: user.id, name: user.name, username: user.username, email: user.email, bio: user.bio, photo: user.photo };
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      photo: user.photo,
+      coverPhoto: user.coverPhoto,
+      profileLinks: user.profileLinks,
+      tags: user.tags,
+      musicTrack: user.musicTrack,
+    };
   }
+
+  async updateProfileV2(data: any) {
+    const { user_id, name, bio, phone, photo, coverPhoto, profileLinks, tags, musicTrack, musicTitle } = data;
+    const user = await this.prisma.user.update({
+      where: { id: parseInt(user_id) },
+      data: {
+        name,
+        bio,
+        phone,
+        photo,
+        coverPhoto,
+        profileLinks: Array.isArray(profileLinks) ? profileLinks : [],
+        tags: Array.isArray(tags) ? tags : [],
+        musicTrack,
+        musicTitle,
+      },
+    });
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      photo: user.photo,
+      coverPhoto: user.coverPhoto,
+      profileLinks: user.profileLinks,
+      tags: user.tags,
+      musicTrack: user.musicTrack,
+      musicTitle: user.musicTitle,
+    };
+  }
+
 }

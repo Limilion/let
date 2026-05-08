@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/auth_provider.dart';
 import '../providers/story_provider.dart';
 import '../providers/theme_provider.dart';
+import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 
 class StoriesBar extends StatelessWidget {
@@ -26,40 +27,42 @@ class StoriesBar extends StatelessWidget {
     final stories = storyProvider.stories;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: colors.background,
-        border: Border(
-          bottom: BorderSide(color: colors.border.withValues(alpha: 0.5)),
-        ),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          children: [
-            // My Story / Add Story
-            _buildStoryItem(
-              onTap: onAddStory,
-              userName: 'قصتي',
-              imageUrl: ApiService.getImageUrl(user?['photo']),
-              isAdd: true,
-              colors: colors,
-            ),
-            const SizedBox(width: 20),
-            // Dynamic Stories
-            ...stories.map((item) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: _buildStoryItem(
-                  onTap: () => onStoryPress(item),
-                  userName: item.userName,
-                  imageUrl: ApiService.getImageUrl(item.userPhoto),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      color: Colors.transparent, // Flow naturally with the background
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.only(left: 0, right: 10),
+            child: Row(
+              children: [
+                // My Story / Add Story (always on left edge)
+                _buildStoryItem(
+                  onTap: onAddStory,
+                  userName: 'قصتي',
+                  imageUrl: ApiService.getImageUrl(user?['photo']),
+                  isAdd: true,
                   colors: colors,
                 ),
-              );
-            }),
-          ],
+                const SizedBox(width: 10),
+                // Dynamic Stories
+                ...stories.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: _buildStoryItem(
+                      onTap: () => onStoryPress(item),
+                      userName: item.userName,
+                      imageUrl: ApiService.getImageUrl(item.userPhoto),
+                      colors: colors,
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -70,42 +73,69 @@ class StoriesBar extends StatelessWidget {
     required String userName,
     String? imageUrl,
     bool isAdd = false,
-    required dynamic colors,
+    required CustomColors colors,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 76,
+    return SizedBox(
+      width: 64,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(40),
         child: Column(
           children: [
             Stack(
               alignment: Alignment.bottomRight,
               children: [
                 Container(
-                  width: 68,
-                  height: 68,
-                  padding: const EdgeInsets.all(2.5),
+                  width: 58,
+                  height: 58,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isAdd ? colors.textSecondary.withValues(alpha: 0.2) : colors.primary,
-                      width: 1.5,
-                    ),
+                    color: isAdd ? colors.surface : null,
+                    gradient: isAdd
+                        ? null
+                        : LinearGradient(
+                            colors: colors.primaryGradient,
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    border: isAdd
+                        ? Border.all(
+                            color: colors.primary.withValues(alpha: 0.2),
+                          )
+                        : null,
                   ),
+                  padding: const EdgeInsets.all(2.5), // Space for inner circle
                   child: Container(
-                    padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: colors.background,
+                      color: colors.background, // Creates the gap
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
-                      child: imageUrl != null && imageUrl.isNotEmpty
+                    padding: const EdgeInsets.all(2.5),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colors.surface,
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: isAdd && imageUrl != null && imageUrl.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: imageUrl,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(color: colors.surface),
-                              errorWidget: (context, url, error) => _buildPlaceholder(colors),
+                              placeholder: (context, url) =>
+                                  Container(color: colors.surface),
+                              errorWidget: (context, url, error) =>
+                                  _buildPlaceholder(colors),
+                            )
+                          : isAdd
+                          ? _buildPlaceholder(colors)
+                          : imageUrl != null && imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  Container(color: colors.surface),
+                              errorWidget: (context, url, error) =>
+                                  _buildPlaceholder(colors),
                             )
                           : _buildPlaceholder(colors),
                     ),
@@ -113,15 +143,19 @@ class StoriesBar extends StatelessWidget {
                 ),
                 if (isAdd)
                   Container(
-                    width: 22,
-                    height: 22,
+                    width: 20,
+                    height: 20,
                     decoration: BoxDecoration(
                       color: colors.primary,
                       shape: BoxShape.circle,
                       border: Border.all(color: colors.background, width: 2),
                     ),
                     alignment: Alignment.center,
-                    child: const Icon(Icons.add, size: 12, color: Colors.white),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      size: 12,
+                      color: Colors.white,
+                    ),
                   ),
               ],
             ),
@@ -130,10 +164,12 @@ class StoriesBar extends StatelessWidget {
               userName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: isAdd ? FontWeight.w500 : FontWeight.w700,
-                color: colors.text,
+                fontWeight: isAdd ? FontWeight.w600 : FontWeight.w800,
+                letterSpacing: -0.2,
+                color: isAdd ? colors.textSecondary : colors.text,
               ),
             ),
           ],
@@ -142,10 +178,14 @@ class StoriesBar extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder(dynamic colors) {
+  Widget _buildPlaceholder(CustomColors colors) {
     return Container(
-      color: colors.primary.withValues(alpha: 0.1),
-      child: Icon(Icons.person, size: 26, color: colors.primary),
+      color: colors.primary.withValues(alpha: 0.05),
+      child: Icon(
+        Icons.person_rounded,
+        size: 30,
+        color: colors.primary.withValues(alpha: 0.5),
+      ),
     );
   }
 }

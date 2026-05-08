@@ -31,14 +31,14 @@ class PhoneFrame extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 15,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(
-          color: colors.border.withOpacity(0.8),
+          color: colors.border.withValues(alpha: 0.8),
           width: 8, // Bezel
         ),
       ),
@@ -57,7 +57,7 @@ class PhoneFrame extends StatelessWidget {
                 height: 20,
                 width: 70,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.9),
+                  color: Colors.black.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(

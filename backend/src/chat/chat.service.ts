@@ -28,6 +28,12 @@ export class ChatService {
     return conversations.map((conv) => {
       const otherUser = conv.user1Id === userId ? conv.user2 : conv.user1;
       const lastMessage = conv.messages[0];
+      let lastText = '';
+      if (lastMessage) {
+        if (lastMessage.type === 'voice') lastText = '🎤 رسالة صوتية';
+        else if (lastMessage.type === 'image') lastText = '📷 صورة';
+        else lastText = lastMessage.content || '';
+      }
       return {
         id: conv.id.toString(),
         otherUser: {
@@ -36,7 +42,7 @@ export class ChatService {
           username: otherUser.username,
           photo: otherUser.photo,
         },
-        lastMessage: lastMessage ? lastMessage.content : '',
+        lastMessage: lastText,
         time: lastMessage ? lastMessage.createdAt.toISOString() : conv.updatedAt.toISOString(),
         unreadCount: 0,
       };
@@ -65,13 +71,15 @@ export class ChatService {
       senderId: m.senderId.toString(),
       receiverId: m.receiverId.toString(),
       message: m.content,
+      mediaUrl: m.mediaUrl,
+      type: m.type,
       createdAt: m.createdAt,
       time: m.createdAt.toISOString(),
       isMe: m.senderId === userId,
     }));
   }
 
-  async sendMessage(senderId: number, receiverId: number, content: string) {
+  async sendMessage(senderId: number, receiverId: number, content: string, file?: any, type: string = 'text') {
     let conversation = await this.prisma.conversation.findFirst({
       where: {
         OR: [
@@ -95,7 +103,9 @@ export class ChatService {
         conversationId: conversation.id,
         senderId,
         receiverId,
-        content,
+        content: content || null,
+        mediaUrl: file ? `/uploads/${file.filename}` : null,
+        type,
       },
     });
 
@@ -109,6 +119,8 @@ export class ChatService {
       senderId: message.senderId.toString(),
       receiverId: message.receiverId.toString(),
       message: message.content,
+      mediaUrl: message.mediaUrl,
+      type: message.type,
       createdAt: message.createdAt,
       time: message.createdAt.toISOString(),
       isMe: false, // For the receiver

@@ -14,13 +14,21 @@ model User {
   password  String
   phone     String?
   photo     String?
+  coverPhoto String?
   bio       String?
+  profileLinks String[] @default([])
+  tags       String[] @default([])
+  musicTrack String?
+  musicTitle String?
   createdAt DateTime @default(now())
 
   posts         Post[]
   comments      Comment[]
+  commentLikes  CommentLike[]
+  notifications Notification[]
   likes         Like[]
   savedPosts    SavedPost[]
+  postViews     PostView[]
   followers     Follower[] @relation("following")
   following     Follower[] @relation("follower")
   stories       Story[]
@@ -30,6 +38,8 @@ model User {
   receivedMessages Message[] @relation("receiver")
   convos1       Conversation[] @relation("user1")
   convos2       Conversation[] @relation("user2")
+  appEvents     AppEvent[]
+  notes         Note?
 }
 
 model Post {
@@ -48,6 +58,19 @@ model Post {
   likes      Like[]
   comments   Comment[]
   savedBy    SavedPost[]
+  views      PostView[]
+  mediaItems PostMedia[]
+}
+
+model PostMedia {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  url       String
+  mediaType String   @default("image")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model Like {
@@ -67,13 +90,56 @@ model Comment {
   userId    Int
   postId    Int
   comment   String
+  parentId  Int?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+  likes CommentLike[]
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  commentId Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  actorId    Int
+  type       String
+  title      String
+  body       String
+  postId     Int?
+  commentId  Int?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SavedPost {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model PostView {
   id        Int      @id @default(autoincrement())
   userId    Int
   postId    Int
@@ -151,10 +217,37 @@ model Message {
   conversationId Int
   senderId       Int
   receiverId     Int
-  content        String
+  content        String?
+  mediaUrl       String?
+  type           String   @default("text") // 'text', 'voice', 'image'
+  isRead         Boolean  @default(false)
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id])
   sender       User         @relation("sender", fields: [senderId], references: [id])
   receiver     User         @relation("receiver", fields: [receiverId], references: [id])
+}
+
+model AppEvent {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  name       String
+  source     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([name, createdAt])
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  content   String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

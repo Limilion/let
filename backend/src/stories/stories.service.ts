@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class StoryService {
@@ -77,5 +79,26 @@ export class StoryService {
       create: { userId, storyId },
       update: {},
     });
+  }
+
+  async deleteStory(userId: number, storyId: number) {
+    const story = await this.prisma.story.findUnique({ where: { id: storyId } });
+    if (!story) throw new NotFoundException('القصة غير موجودة');
+    if (story.userId !== userId) throw new ForbiddenException('غير مصرح لك بحذف هذه القصة');
+    
+    // Cleanup media file from storage
+    if (story.mediaUrl && story.mediaUrl.startsWith('/uploads/')) {
+      const filePath = path.join(process.cwd(), story.mediaUrl);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (e) {
+        console.error(`Failed to delete story media: ${filePath}`, e);
+      }
+    }
+
+    await this.prisma.story.delete({ where: { id: storyId } });
+    return { success: true, message: 'تم حذف القصة بنجاح' };
   }
 }

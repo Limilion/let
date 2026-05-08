@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../screens/home/welcome_screen.dart';
-import '../screens/home/feed_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
@@ -19,30 +17,40 @@ import '../screens/home/create_post_screen.dart';
 import '../screens/home/create_story_screen.dart';
 import '../screens/home/edit_profile_screen.dart';
 import '../screens/home/notifications_screen.dart';
+import '../screens/home/search_screen.dart';
+import '../screens/home/feature_placeholder_screen.dart';
+import '../screens/home/ai_assistant_screen.dart';
+import '../screens/home/incoming_call_screen.dart';
+import '../screens/home/call_screen.dart';
 import '../providers/story_provider.dart';
 import '../models/post.dart';
 
 class AppRouter {
-  static final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
+  static final GlobalKey<NavigatorState> rootNavigatorKey =
+      GlobalKey<NavigatorState>();
+  static final RouteObserver<ModalRoute> routeObserver =
+      RouteObserver<ModalRoute>();
 
   static GoRouter createRouter(AuthProvider authProvider) {
     return GoRouter(
       navigatorKey: rootNavigatorKey,
       observers: [routeObserver],
-      initialLocation: authProvider.isAuthenticated ? '/welcome' : '/login',
+      initialLocation: '/welcome',
       refreshListenable: authProvider,
       redirect: (context, state) {
         final bool loggedIn = authProvider.isAuthenticated;
-        final bool loggingIn = state.matchedLocation == '/login' ||
+        final bool authRoute =
+            state.matchedLocation == '/welcome' ||
+            state.matchedLocation == '/login' ||
             state.matchedLocation == '/register';
 
         if (!loggedIn) {
-          return loggingIn ? null : '/login';
+          return authRoute ? null : '/welcome';
         }
 
-        if (loggingIn) {
-          return '/welcome';
+        if (state.matchedLocation == '/login' ||
+            state.matchedLocation == '/register') {
+          return '/main';
         }
 
         return null;
@@ -53,8 +61,9 @@ class AppRouter {
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const LoginScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    FadeTransition(opacity: animation, child: child),
           ),
         ),
         GoRoute(
@@ -62,8 +71,9 @@ class AppRouter {
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const RegisterScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    FadeTransition(opacity: animation, child: child),
           ),
         ),
         GoRoute(
@@ -71,37 +81,58 @@ class AppRouter {
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const WelcomeScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    FadeTransition(opacity: animation, child: child),
           ),
         ),
         GoRoute(
           path: '/main',
           pageBuilder: (context, state) {
-            final int initialIndex = state.extra is int ? state.extra as int : 0;
+            int initialIndex = 0;
+            String? initialVideoPostId;
+            if (state.extra is int) {
+              initialIndex = state.extra as int;
+            } else if (state.extra is Map<String, dynamic>) {
+              final extra = state.extra as Map<String, dynamic>;
+              initialIndex = extra['initialIndex'] is int
+                  ? extra['initialIndex'] as int
+                  : 0;
+              initialVideoPostId = extra['videoPostId']?.toString();
+            }
             return CustomTransitionPage(
               key: state.pageKey,
-              child: MainScreen(initialIndex: initialIndex),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                  FadeTransition(opacity: animation, child: child),
+              child: MainScreen(
+                initialIndex: initialIndex,
+                initialVideoPostId: initialVideoPostId,
+              ),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(opacity: animation, child: child),
             );
           },
         ),
         GoRoute(
           path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
+          builder: (context, state) {
+            final heroTag = state.extra is String ? state.extra as String : null;
+            return ProfileScreen(heroTag: heroTag);
+          },
         ),
         GoRoute(
           path: '/user-profile/:userId',
           builder: (context, state) {
             final userId = state.pathParameters['userId']!;
-            return UserProfileScreen(userId: userId);
+            final heroTag = state.extra is String ? state.extra as String : null;
+            return UserProfileScreen(userId: userId, heroTag: heroTag);
           },
         ),
         GoRoute(
           path: '/chat',
           builder: (context, state) {
-            final otherUser = state.extra as Map<String, dynamic>;
+            final otherUser = state.extra is Map<String, dynamic>
+                ? state.extra as Map<String, dynamic>
+                : <String, dynamic>{'id': '', 'name': 'مستخدم'};
             return ChatScreen(otherUser: otherUser);
           },
         ),
@@ -116,24 +147,45 @@ class AppRouter {
         GoRoute(
           path: '/story-viewer',
           pageBuilder: (context, state) {
+            if (state.extra is! Map<String, dynamic>) {
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: const MainScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) =>
+                        FadeTransition(opacity: animation, child: child),
+              );
+            }
             final extra = state.extra as Map<String, dynamic>;
-            final userWithStories = extra['userWithStories'] as UserStory;
-            final initialIndex = extra['initialIndex'] as int;
+            final userWithStories = extra['userWithStories'];
+            final initialIndex = extra['initialIndex'] as int? ?? 0;
+            if (userWithStories is! UserStory) {
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: const MainScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) =>
+                        FadeTransition(opacity: animation, child: child),
+              );
+            }
             return CustomTransitionPage(
               key: state.pageKey,
               child: StoryViewerScreen(
                 userWithStories: userWithStories,
                 initialIndex: initialIndex,
               ),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: animation.drive(Tween(
-                    begin: const Offset(0.0, 1.0),
-                    end: Offset.zero,
-                  ).chain(CurveTween(curve: Curves.easeInOutQuart))),
-                  child: child,
-                );
-              },
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return SlideTransition(
+                      position: animation.drive(
+                        Tween(
+                          begin: const Offset(0.0, 1.0),
+                          end: Offset.zero,
+                        ).chain(CurveTween(curve: Curves.easeInOutQuart)),
+                      ),
+                      child: child,
+                    );
+                  },
             );
           },
         ),
@@ -144,52 +196,75 @@ class AppRouter {
         GoRoute(
           path: '/post-details',
           pageBuilder: (context, state) {
+            if (state.extra is! Post) {
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: const MainScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) =>
+                        FadeTransition(opacity: animation, child: child),
+              );
+            }
             final post = state.extra as Post;
             return CustomTransitionPage(
               key: state.pageKey,
               child: PostDetailsScreen(post: post),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: animation.drive(Tween(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).chain(CurveTween(curve: Curves.easeInOutQuart))),
-                  child: child,
-                );
-              },
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return SlideTransition(
+                      position: animation.drive(
+                        Tween(
+                          begin: const Offset(1.0, 0.0),
+                          end: Offset.zero,
+                        ).chain(CurveTween(curve: Curves.easeInOutQuart)),
+                      ),
+                      child: child,
+                    );
+                  },
             );
           },
         ),
         GoRoute(
           path: '/create-post',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const CreatePostScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: animation.drive(Tween(
-                    begin: const Offset(0.0, 1.0),
-                    end: Offset.zero,
-                  ).chain(CurveTween(curve: Curves.easeInOutQuart))),
-                  child: child,
-                );
-              },
-          ),
+          pageBuilder: (context, state) {
+            final extra = state.extra is Map<String, dynamic>
+                ? state.extra as Map<String, dynamic>
+                : <String, dynamic>{};
+            return CustomTransitionPage(
+              key: state.pageKey,
+              child: CreatePostScreen(extra: extra),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return SlideTransition(
+                      position: animation.drive(
+                        Tween(
+                          begin: const Offset(0.0, 1.0),
+                          end: Offset.zero,
+                        ).chain(CurveTween(curve: Curves.easeInOutQuart)),
+                      ),
+                      child: child,
+                    );
+                  },
+            );
+          },
         ),
         GoRoute(
           path: '/create-story',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const CreateStoryScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return SlideTransition(
-                position: animation.drive(Tween(
-                  begin: const Offset(0.0, 1.0),
-                  end: Offset.zero,
-                ).chain(CurveTween(curve: Curves.easeInOutQuart))),
-                child: child,
-              );
-            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position: animation.drive(
+                      Tween(
+                        begin: const Offset(0.0, 1.0),
+                        end: Offset.zero,
+                      ).chain(CurveTween(curve: Curves.easeInOutQuart)),
+                    ),
+                    child: child,
+                  );
+                },
           ),
         ),
         GoRoute(
@@ -197,8 +272,44 @@ class AppRouter {
           builder: (context, state) => const NotificationsScreen(),
         ),
         GoRoute(
+          path: '/search',
+          builder: (context, state) => const SearchScreen(),
+        ),
+        GoRoute(
           path: '/edit-profile',
           builder: (context, state) => const EditProfileScreen(),
+        ),
+        GoRoute(
+          path: '/create-live',
+          builder: (context, state) => const FeaturePlaceholderScreen(
+            title: 'بث مباشر',
+            subtitle: 'واجهة البث المباشر قيد التطوير.',
+          ),
+        ),
+        GoRoute(
+          path: '/create-note',
+          builder: (context, state) => const FeaturePlaceholderScreen(
+            title: 'ملاحظة',
+            subtitle: 'يمكنك قريبًا إنشاء ملاحظات سريعة.',
+          ),
+        ),
+        GoRoute(
+          path: '/ai-assistant',
+          builder: (context, state) => const AIAssistantScreen(),
+        ),
+        GoRoute(
+          path: '/incoming-call',
+          builder: (context, state) {
+            final callData = state.extra as Map<String, dynamic>;
+            return IncomingCallScreen(callData: callData);
+          },
+        ),
+        GoRoute(
+          path: '/call',
+          builder: (context, state) {
+            final callData = state.extra as Map<String, dynamic>;
+            return CallScreen(callData: callData);
+          },
         ),
       ],
     );

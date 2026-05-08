@@ -32,6 +32,7 @@ class StoryItem {
   final String type;
   final bool isLiked;
   final int likes;
+  final int? views;
   final bool isViewed;
 
   StoryItem({
@@ -40,6 +41,7 @@ class StoryItem {
     required this.type,
     this.isLiked = false,
     this.likes = 0,
+    this.views = 0,
     this.isViewed = false,
   });
 
@@ -50,6 +52,7 @@ class StoryItem {
       type: json['media_type'] ?? 'image',
       isLiked: json['isLiked'] == true || json['isLiked'] == 1,
       likes: int.tryParse(json['likes'].toString()) ?? 0,
+      views: int.tryParse(json['views']?.toString() ?? json['views_count']?.toString() ?? '0'),
     );
   }
 }
@@ -57,11 +60,28 @@ class StoryItem {
 class StoryProvider with ChangeNotifier {
   List<UserStory> _stories = [];
   bool _loading = false;
-  final AuthProvider _authProvider;
+  AuthProvider _authProvider;
 
   StoryProvider(this._authProvider) {
     if (_authProvider.isAuthenticated) {
       fetchStories();
+    }
+  }
+
+  void updateAuth(AuthProvider auth) {
+    final wasAuthenticated = _authProvider.isAuthenticated;
+    final oldUserId = wasAuthenticated ? (_authProvider.user?['id']?.toString()) : null;
+    
+    _authProvider = auth;
+    
+    final isNowAuthenticated = _authProvider.isAuthenticated;
+    final newUserId = isNowAuthenticated ? (_authProvider.user?['id']?.toString()) : null;
+
+    if (isNowAuthenticated && (!wasAuthenticated || oldUserId != newUserId || _stories.isEmpty)) {
+      fetchStories();
+    } else if (!isNowAuthenticated && wasAuthenticated) {
+      _stories = [];
+      notifyListeners();
     }
   }
 

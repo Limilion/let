@@ -8,6 +8,8 @@ import { StoryModule } from './stories/stories.module';
 import { ChatModule } from './chat/chat.module';
 import { CommentModule } from './comments/comments.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { AIModule } from './ai/ai.module';
+import { NotesModule } from './notes/notes.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { MulterModule } from '@nestjs/platform-express';
     StoryModule,
     ChatModule,
     CommentModule,
+    AIModule,
+    NotesModule,
     MulterModule.register({
       dest: './uploads',
     }),

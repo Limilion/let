@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/theme_provider.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/custom_button.dart';
 
@@ -15,47 +15,17 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStateMixin {
+class _RegisterScreenState extends State<RegisterScreen>
+    with TickerProviderStateMixin {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
-  
+
   File? _avatar;
   bool _showPassword = false;
-  String? _focusedInput;
-
-  late AnimationController _fadeController;
-  late AnimationController _slideController;
-  late AnimationController _avatarController;
-
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _avatarAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _slideController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _avatarController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
-    );
-    _slideAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOut),
-    );
-    _avatarAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _avatarController, curve: Curves.elasticOut),
-    );
-
-    _fadeController.forward();
-    _slideController.forward();
-    _avatarController.forward();
-  }
 
   @override
   void dispose() {
@@ -64,9 +34,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
-    _fadeController.dispose();
-    _slideController.dispose();
-    _avatarController.dispose();
     super.dispose();
   }
 
@@ -87,23 +54,17 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   }
 
   Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
     final name = _nameController.text;
     final email = _emailController.text;
     final phone = _phoneController.text;
     final password = _passwordController.text;
     final confirm = _confirmController.text;
 
-    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى ملء جميع الحقول')),
-      );
-      return;
-    }
-
     if (password != confirm) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('كلمات المرور غير متطابقة')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('كلمات المرور غير متطابقة')));
       return;
     }
 
@@ -121,15 +82,24 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('نجاح'),
-            content: const Text('تم إنشاء الحساب بنجاح! يرجى تفعيل بريدك الإلكتروني.'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            title: const Text(
+              'نجاح',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
+            content: const Text('تم إنشاء الحساب بنجاح! يرجى الدخول لحسابك.'),
             actions: [
-              TextButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
                   context.go('/login');
                 },
-                child: const Text('حسناً'),
+                child: const Text(
+                  'حسناً',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -146,191 +116,170 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final colors = themeProvider.colors;
+    final colors = Theme.of(context).extension<CustomColors>()!;
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       backgroundColor: colors.background,
+      appBar: AppBar(
+        backgroundColor: colors.background,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: AnimatedBuilder(
-            animation: Listenable.merge([_fadeController, _slideController, _avatarController]),
-            builder: (context, child) {
-              return Opacity(
-                opacity: _fadeAnimation.value,
-                child: Transform.translate(
-                  offset: Offset(0, _slideAnimation.value),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => context.pop(),
-                            icon: Icon(Icons.arrow_back, color: colors.text),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'إنشاء حساب جديد',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: colors.text,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Image.asset(
-                        'assets/images/logo.png',
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 35),
-                      // Avatar Section
-                      ScaleTransition(
-                        scale: _avatarAnimation,
-                        child: GestureDetector(
-                          onTap: _handleChoosePhoto,
-                          child: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              Container(
-                                width: 110,
-                                height: 110,
-                                decoration: BoxDecoration(
-                                  color: themeProvider.isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: colors.border, width: 2),
-                                  image: _avatar != null
-                                      ? DecorationImage(image: FileImage(_avatar!), fit: BoxFit.cover)
-                                      : null,
-                                ),
-                                child: _avatar == null
-                                    ? Icon(Icons.person_outline, size: 45, color: colors.textSecondary)
-                                    : null,
-                              ),
-                              Container(
-                                width: 34,
-                                height: 34,
-                                decoration: BoxDecoration(
-                                  color: colors.primary,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 3),
-                                ),
-                                child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'أضف لمستك الخاصة بوضع صورة',
-                        style: TextStyle(fontSize: 13, color: colors.textSecondary, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 35),
-                      // Form
-                      CustomInput(
-                        placeholder: 'الاسم الكامل',
-                        icon: Icons.person_outline,
-                        controller: _nameController,
-                        isFocused: _focusedInput == 'name',
-                        onChanged: (v) => setState(() {}),
-                      ),
-                      const SizedBox(height: 14),
-                      CustomInput(
-                        placeholder: 'البريد الإلكتروني',
-                        icon: Icons.mail_outline,
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        isFocused: _focusedInput == 'email',
-                        onChanged: (v) => setState(() {}),
-                      ),
-                      const SizedBox(height: 14),
-                      CustomInput(
-                        placeholder: 'رقم الهاتف',
-                        icon: Icons.phone_outlined,
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        isFocused: _focusedInput == 'phone',
-                        onChanged: (v) => setState(() {}),
-                      ),
-                      const SizedBox(height: 14),
-                      CustomInput(
-                        placeholder: 'كلمة المرور',
-                        icon: Icons.lock_outline,
-                        controller: _passwordController,
-                        isPassword: true,
-                        showPassword: _showPassword,
-                        onTogglePassword: () => setState(() => _showPassword = !_showPassword),
-                        isFocused: _focusedInput == 'password',
-                        onChanged: (v) => setState(() {}),
-                      ),
-                      const SizedBox(height: 14),
-                      CustomInput(
-                        placeholder: 'تأكيد كلمة المرور',
-                        icon: Icons.shield_outlined,
-                        controller: _confirmController,
-                        isPassword: true,
-                        showPassword: _showPassword,
-                        isFocused: _focusedInput == 'confirm',
-                        onChanged: (v) => setState(() {}),
-                      ),
-                      const SizedBox(height: 25),
-                      CustomButton(
-                        text: 'إنشاء حساب جديد',
-                        onPressed: _handleRegister,
-                        loading: authProvider.loading,
-                      ),
-                      const SizedBox(height: 25),
-                      // Divider and Google
-                      Row(
-                        children: [
-                          Expanded(child: Divider(color: colors.border)),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            child: Text('أو', style: TextStyle(color: colors.textSecondary)),
-                          ),
-                          Expanded(child: Divider(color: colors.border)),
-                        ],
-                      ),
-                      const SizedBox(height: 25),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('خدمة التسجيل عبر جوجل ستتوفر قريباً')),
-                          );
-                        },
-                        icon: const Icon(Icons.g_mobiledata, size: 30),
-                        label: const Text('التسجيل عبر جوجل'),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('لديك حساب بالفعل؟', style: TextStyle(color: colors.textSecondary)),
-                          TextButton(
-                            onPressed: () => context.pop(),
-                            child: Text(
-                              'سجل دخول',
-                              style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          child: Column(
+            children: [
+              Text(
+                'إنشاء حساب جديد!',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w800,
+                  color: colors.text,
                 ),
-              );
-            },
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'انضم إلى تواصل الآن',
+                style: TextStyle(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 18),
+              GestureDetector(
+                onTap: _handleChoosePhoto,
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: colors.primary.withValues(alpha: 0.12),
+                      backgroundImage: _avatar != null
+                          ? FileImage(_avatar!)
+                          : null,
+                      child: _avatar == null
+                          ? Icon(
+                              Icons.camera_alt_rounded,
+                              color: colors.primary,
+                              size: 26,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'إضافة صورة شخصية',
+                      style: TextStyle(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  children: [
+                    CustomInput(
+                      placeholder: 'الاسم الكامل',
+                      icon: Icons.person_outline_rounded,
+                      controller: _nameController,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'الاسم مطلوب'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    CustomInput(
+                      placeholder: 'اسم المستخدم',
+                      icon: Icons.alternate_email_rounded,
+                      controller: _phoneController,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'اسم المستخدم مطلوب'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    CustomInput(
+                      placeholder: 'البريد الإلكتروني',
+                      icon: Icons.mail_outline_rounded,
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty)
+                          return 'البريد الإلكتروني مطلوب';
+                        if (!v.contains('@')) return 'صيغة البريد غير صحيحة';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    CustomInput(
+                      placeholder: 'كلمة المرور',
+                      icon: Icons.lock_outline_rounded,
+                      controller: _passwordController,
+                      isPassword: true,
+                      showPassword: _showPassword,
+                      onTogglePassword: () =>
+                          setState(() => _showPassword = !_showPassword),
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'كلمة المرور مطلوبة';
+                        if (v.length < 6) return '6 أحرف على الأقل';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    CustomInput(
+                      placeholder: 'تأكيد كلمة المرور',
+                      icon: Icons.lock_reset_rounded,
+                      controller: _confirmController,
+                      isPassword: true,
+                      showPassword: _showPassword,
+                      validator: (v) {
+                        if (v == null || v.isEmpty)
+                          return 'تأكيد كلمة المرور مطلوب';
+                        if (v != _passwordController.text)
+                          return 'كلمات المرور غير متطابقة';
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Checkbox(
+                    value: true,
+                    onChanged: (_) {},
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  Expanded(
+                    child: Text(
+                      'أوافق على الشروط والأحكام وسياسة الخصوصية',
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              CustomButton(
+                text: 'إنشاء حساب',
+                onPressed: authProvider.loading ? null : _handleRegister,
+                loading: authProvider.loading,
+                height: 52,
+              ),
+              const SizedBox(height: 14),
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text('لديك حساب؟ تسجيل الدخول'),
+              ),
+            ],
           ),
         ),
       ),

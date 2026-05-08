@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "704745927676",
+    "project_id": "modo-b161c",
+    "storage_bucket": "modo-b161c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:704745927676:android:d4436e0a3964a45f63f879",
+        "android_client_info": {
+          "package_name": "com.example.MODO"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSPyEA0AOZ6LwjGRWHyi1AalaDw_z6lYs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

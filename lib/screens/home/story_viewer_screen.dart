@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import '../../providers/story_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/api_service.dart';
 import 'package:go_router/go_router.dart';
@@ -30,6 +31,8 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
   bool _isPaused = false;
   bool _isLoading = false;
   bool _isBackground = false;
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -92,7 +95,53 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _videoController?.dispose();
+    _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSendMessage() async {
+    final text = _commentController.text.trim();
+    if (text.isEmpty || _isSending) return;
+
+    setState(() {
+      _isSending = true;
+      _isPaused = true;
+    });
+    _animationController.stop();
+    _videoController?.pause();
+
+    try {
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      final receiverId = widget.userWithStories.userId;
+      
+      final result = await chatProvider.sendMessage(receiverId, 'الرد على القصة: \n$text');
+      
+      if (mounted) {
+        if (result['success']) {
+          _commentController.clear();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم إرسال الرد بنجاح'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result['message'] ?? 'فشل إرسال الرد')),
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSending = false;
+          _isPaused = false;
+        });
+        _animationController.forward();
+        _videoController?.play();
+      }
+    }
   }
 
   void _loadStory({required StoryItem story, bool animate = true}) {
@@ -131,7 +180,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
       _loadStory(story: _stories[_currentIndex]);
       _markViewed();
     } else {
-      context.pop();
+      if (context.canPop()) context.pop();
     }
   }
 
@@ -269,20 +318,38 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.userWithStories.userName,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      Row(
+                        children: [
+                          Text(
+                            widget.userWithStories.userName,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          if (story.views != null && story.views! > 0)
+                            Row(
+                              children: [
+                                const Icon(Icons.remove_red_eye_outlined, color: Colors.white70, size: 14),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${story.views}',
+                                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                        ],
                       ),
-                      const Text(
+                      Text(
                         'منذ قليل',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
                   ),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                    onPressed: () => context.pop(),
+                    onPressed: () {
+                      if (context.canPop()) context.pop();
+                    },
                   ),
                 ],
               ),
@@ -297,18 +364,27 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
                 children: [
                   Expanded(
                     child: Container(
-                      height: 45,
+                      height: 48,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white54),
+                        color: Colors.white.withValues(alpha: 0.1),
+                        border: Border.all(color: Colors.white30),
                         borderRadius: BorderRadius.circular(25),
                       ),
-                      child: const TextField(
-                        style: TextStyle(color: Colors.white),
+                      child: TextField(
+                        controller: _commentController,
+                        onSubmitted: (_) => _handleSendMessage(),
+                        onTap: () {
+                           setState(() => _isPaused = true);
+                           _animationController.stop();
+                           _videoController?.pause();
+                        },
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
                         decoration: InputDecoration(
                           hintText: 'ارسل رسالة...',
-                          hintStyle: TextStyle(color: Colors.white70),
+                          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                           border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
                     ),
@@ -336,8 +412,10 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send_outlined, color: Colors.white, size: 28),
-                    onPressed: () {},
+                    icon: _isSending 
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.send_rounded, color: Colors.white, size: 26),
+                    onPressed: _handleSendMessage,
                   ),
                 ],
               ),
