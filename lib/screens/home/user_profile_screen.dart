@@ -151,7 +151,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
                   SliverAppBar(
-                    expandedHeight: 400,
+                    expandedHeight: 220,
                     floating: false,
                     pinned: true,
                     backgroundColor: colors.background,
@@ -170,49 +170,24 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                       background: Stack(
                         children: [
                           // Cover area
-                          SizedBox(
-                            height: 200,
-                            child: Stack(
-                              children: [
-                                if (coverUrl != null)
-                                  CachedNetworkImage(
-                                    imageUrl: coverUrl,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: 200,
-                                    placeholder: (context, url) => Shimmer.fromColors(
-                                      baseColor: colors.border.withValues(alpha: 0.1),
-                                      highlightColor: colors.surface,
-                                      child: Container(color: Colors.white),
-                                    ),
-                                  )
-                                else
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: colors.primaryGradient,
-                                      ),
-                                    ),
-                                  ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.black.withValues(alpha: 0.2),
-                                        colors.background,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          // Background Gradient (instead of cover)
+                          Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  colors.primary.withValues(alpha: 0.1),
+                                  colors.background,
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
                             ),
                           ),
 
                           // Horizontal Profile Info
                           Positioned(
-                            top: 140,
+                            top: 60,
                             left: 0,
                             right: 0,
                             child: Column(
@@ -315,16 +290,35 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                                                   'منشور',
                                                   colors,
                                                 ),
-                                                _buildCompactStat(
-                                                  _profileData!['followersCount']
-                                                      .toString(),
-                                                  'متابع',
-                                                  colors,
+                                                GestureDetector(
+                                                  onTap: () => context.push('/followers/${widget.userId}'),
+                                                  child: _buildCompactStat(
+                                                    _profileData!['followersCount']
+                                                        .toString(),
+                                                    'متابع',
+                                                    colors,
+                                                  ),
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () => context.push('/following/${widget.userId}'),
+                                                  child: _buildCompactStat(
+                                                    _profileData!['followingCount']
+                                                        .toString(),
+                                                    'يتابع',
+                                                    colors,
+                                                  ),
+                                                ),
+                                                GestureDetector(
+                                                  onTap: isMe ? () => context.push('/liked-posts') : null,
+                                                  child: _buildCompactStat(
+                                                    _profileData!['stats']?['likes']?.toString() ?? '0',
+                                                    'إعجاب',
+                                                    colors,
+                                                  ),
                                                 ),
                                                 _buildCompactStat(
-                                                  _profileData!['followingCount']
-                                                      .toString(),
-                                                  'يتابع',
+                                                  _profileData!['stats']?['views']?.toString() ?? '0',
+                                                  'مشاهدة',
                                                   colors,
                                                 ),
                                               ],
@@ -429,7 +423,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                                                 : colors.primary,
                                             foregroundColor: isFollowing
                                                 ? colors.text
-                                                : Colors.white,
+                                                : Theme.of(context).colorScheme.onPrimary,
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
@@ -445,13 +439,15 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                                             ),
                                           ),
                                           child: _followingLoading
-                                              ? const SizedBox(
+                                              ? SizedBox(
                                                   width: 18,
                                                   height: 18,
                                                   child:
                                                       CircularProgressIndicator(
                                                             strokeWidth: 2,
-                                                            color: Colors.white,
+                                                            color: isFollowing 
+                                                              ? colors.primary 
+                                                              : Theme.of(context).colorScheme.onPrimary,
                                                           ),
                                                 )
                                               : Text(
@@ -614,13 +610,12 @@ class _UserProfileScreenState extends State<UserProfileScreen>
               left: 16,
               child: _buildHeaderAction(
                 Icons.arrow_back_rounded,
-                () async {
+                () {
                   HapticFeedback.lightImpact();
-                  final nav = Navigator.of(context);
-                  if (nav.canPop()) {
-                    await nav.maybePop();
+                  if (context.canPop()) {
+                    context.pop();
                   } else {
-                    context.go('/');
+                    context.go('/main');
                   }
                 },
               ),

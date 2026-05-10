@@ -9,7 +9,8 @@ import 'package:flutter/foundation.dart';
 class ApiService {
   // 📝 ادخل عنوان الـ IP الخاص بجهاز الكمبيوتر هنا (مثلاً 192.168.1.5)
   // يمكنك معرفته من خلال كتابة 'ipconfig' في الـ Terminal الخاص بالكمبيوتر
-  static const String productionUrl = 'https://let-flpx.onrender.com';
+  // static const String productionUrl = 'https://let-flpx.onrender.com';
+  static const String productionUrl = 'http://192.168.100.9:3000';
 
   static String get baseUrl => '$productionUrl/api';
 

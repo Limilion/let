@@ -428,24 +428,24 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               onPressed: _isLoading ? null : _createPost,
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 elevation: 0,
               ),
               child: _isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     )
-                  : const Text(
+                  : Text(
                       'نشر',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
                     ),
             ),
           ),
@@ -505,14 +505,14 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                           controller: _contentController,
                           onChanged: _onTextChanged,
                           maxLines: null,
-                          style: const TextStyle(fontSize: 18),
+                          style: TextStyle(fontSize: 18, color: colors.text),
                           decoration: InputDecoration(
                             hintText: 'بماذا تفكر؟',
                             border: InputBorder.none,
-                            hintStyle: const TextStyle(color: Colors.grey),
+                            hintStyle: TextStyle(color: colors.textSecondary.withValues(alpha: 0.5)),
                             suffixIcon: IconButton(
                               icon: _isGeneratingAI 
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: colors.primary))
                                 : Icon(Icons.auto_awesome, color: colors.primary),
                               onPressed: _isGeneratingAI ? null : _generateAISuggestion,
                               tooltip: 'تحسين بواسطة الذكاء الاصطناعي',
@@ -736,9 +736,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         ),
         child: Row(
           children: [
-            const Text(
+            Text(
               'إضافة إلى منشورك',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, color: colors.text),
             ),
             const Spacer(),
             IconButton(

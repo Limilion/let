@@ -236,7 +236,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
                             aspectRatio: _videoController!.value.aspectRatio,
                             child: VideoPlayer(_videoController!),
                           )
-                        : const CircularProgressIndicator())
+                        : Center(child: CircularProgressIndicator(color: colors.primary)))
                     : Image.network(
                         ApiService.getImageUrl(story.url)!,
                         fit: BoxFit.contain,
@@ -244,7 +244,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
                         height: double.infinity,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
-                          return const Center(child: CircularProgressIndicator());
+                          return Center(child: CircularProgressIndicator(color: colors.primary));
                         },
                       ),
               ),

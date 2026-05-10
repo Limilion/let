@@ -18,10 +18,14 @@ import '../screens/home/create_story_screen.dart';
 import '../screens/home/edit_profile_screen.dart';
 import '../screens/home/notifications_screen.dart';
 import '../screens/home/search_screen.dart';
-import '../screens/home/feature_placeholder_screen.dart';
 import '../screens/home/ai_assistant_screen.dart';
 import '../screens/home/incoming_call_screen.dart';
 import '../screens/home/call_screen.dart';
+import '../screens/home/video_feed_screen.dart';
+import '../screens/home/user_list_screen.dart';
+import '../screens/home/group_info_screen.dart';
+import '../screens/home/create_live_screen.dart';
+import '../screens/home/feature_placeholder_screen.dart';
 import '../providers/story_provider.dart';
 import '../models/post.dart';
 
@@ -48,8 +52,7 @@ class AppRouter {
           return authRoute ? null : '/welcome';
         }
 
-        if (state.matchedLocation == '/login' ||
-            state.matchedLocation == '/register') {
+        if (loggedIn && authRoute) {
           return '/main';
         }
 
@@ -128,12 +131,33 @@ class AppRouter {
           },
         ),
         GoRoute(
+          path: '/followers/:userId',
+          builder: (context, state) {
+            final userId = state.pathParameters['userId']!;
+            return UserListScreen(userId: userId, type: 'followers');
+          },
+        ),
+        GoRoute(
+          path: '/following/:userId',
+          builder: (context, state) {
+            final userId = state.pathParameters['userId']!;
+            return UserListScreen(userId: userId, type: 'following');
+          },
+        ),
+        GoRoute(
           path: '/chat',
           builder: (context, state) {
             final otherUser = state.extra is Map<String, dynamic>
                 ? state.extra as Map<String, dynamic>
                 : <String, dynamic>{'id': '', 'name': 'مستخدم'};
             return ChatScreen(otherUser: otherUser);
+          },
+        ),
+        GoRoute(
+          path: '/group-info',
+          builder: (context, state) {
+            final group = state.extra as Map<String, dynamic>;
+            return GroupInfoScreen(group: group);
           },
         ),
         GoRoute(
@@ -281,10 +305,7 @@ class AppRouter {
         ),
         GoRoute(
           path: '/create-live',
-          builder: (context, state) => const FeaturePlaceholderScreen(
-            title: 'بث مباشر',
-            subtitle: 'واجهة البث المباشر قيد التطوير.',
-          ),
+          builder: (context, state) => const CreateLiveScreen(),
         ),
         GoRoute(
           path: '/create-note',
@@ -302,6 +323,24 @@ class AppRouter {
           builder: (context, state) {
             final callData = state.extra as Map<String, dynamic>;
             return IncomingCallScreen(callData: callData);
+          },
+        ),
+        GoRoute(
+          path: '/video-feed',
+          builder: (context, state) {
+            final videoPostId = state.extra as String?;
+            return Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                  onPressed: () => context.pop(),
+                ),
+              ),
+              body: VideoFeedScreen(initialVideoPostId: videoPostId),
+            );
           },
         ),
         GoRoute(

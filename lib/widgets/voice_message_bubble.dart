@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../services/api_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class VoiceMessageBubble extends StatefulWidget {
   final String audioUrl;
@@ -74,8 +76,9 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = widget.color ?? (widget.isMe ? Colors.white24 : Colors.blue.withValues(alpha: 0.1));
-    final iconColor = widget.isMe ? Colors.white : Colors.blue;
+    final colors = Provider.of<ThemeProvider>(context).colors;
+    final bubbleColor = widget.color ?? (widget.isMe ? colors.primary.withValues(alpha: 0.15) : colors.surface.withValues(alpha: 0.8));
+    final iconColor = widget.isMe ? colors.primary : colors.text;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -128,7 +131,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
                 child: Text(
                   _formatDuration(_isPlaying ? _position : _duration),
                   style: TextStyle(
-                    color: widget.isMe ? Colors.white70 : Colors.black54,
+                    color: widget.isMe ? colors.primary.withValues(alpha: 0.7) : colors.textSecondary,
                     fontSize: 10,
                   ),
                 ),

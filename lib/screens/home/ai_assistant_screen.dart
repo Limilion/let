@@ -78,6 +78,16 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       appBar: AppBar(
         backgroundColor: colors.surface,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.text),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/main');
+            }
+          },
+        ),
         title: Row(
           children: [
             Container(
@@ -86,7 +96,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                 color: colors.primary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(FontAwesomeIcons.wandMagicSparkles, size: 16, color: Colors.white),
+              child: Icon(FontAwesomeIcons.wandMagicSparkles, size: 16, color: Theme.of(context).colorScheme.onPrimary),
             ),
             const SizedBox(width: 12),
             Text(
@@ -203,7 +213,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                       height: 200,
                       width: double.infinity,
                       color: colors.background,
-                      child: const Center(child: CircularProgressIndicator()),
+                      child: Center(child: CircularProgressIndicator(color: colors.primary)),
                     );
                   },
                 ),
@@ -213,7 +223,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             Text(
               message.content,
               style: TextStyle(
-                color: message.isAI ? colors.text : Colors.white,
+                color: message.isAI ? colors.text : Theme.of(context).colorScheme.onPrimary,
                 fontSize: 14,
                 height: 1.5,
                 fontWeight: FontWeight.w500,
@@ -338,7 +348,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                 color: colors.primary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.send_rounded, color: Colors.white),
+              child: Icon(Icons.send_rounded, color: Theme.of(context).colorScheme.onPrimary),
             ),
           ),
         ],

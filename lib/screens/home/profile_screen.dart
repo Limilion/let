@@ -108,14 +108,12 @@ class _ProfileScreenState extends State<ProfileScreen>
               toolbarHeight: 60,
               centerTitle: true,
               leading: IconButton(
-                onPressed: () async {
+                onPressed: () {
                   HapticFeedback.lightImpact();
-                  final nav = Navigator.of(context);
-                  if (nav.canPop()) {
-                    await nav.maybePop();
+                  if (context.canPop()) {
+                    context.pop();
                   } else {
-                    // If we can't pop, go back to home tab
-                    context.go('/');
+                    context.go('/main');
                   }
                 },
                 icon: FaIcon(FontAwesomeIcons.chevronRight, color: colors.text, size: 18),
@@ -256,11 +254,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   ),
                                 ],
                               ),
-                              child: const Center(
-                                child: Text(
-                                  'تعديل الملف الشخصي',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15),
-                                ),
+                              child: Center(
+                                  child: Text(
+                                    'تعديل الملف الشخصي',
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w900, fontSize: 15),
+                                  ),
                               ),
                             ),
                           ),
@@ -328,7 +326,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           margin: const EdgeInsets.only(right: 32),
           width: 60,
           height: 40,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(8)),
         )),
       ),
     );
@@ -346,18 +344,18 @@ class _ProfileScreenState extends State<ProfileScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: colors.infoContainer.withOpacity(0.5),
+          color: colors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: colors.info.withOpacity(0.2)),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FaIcon(FontAwesomeIcons.music, color: colors.info, size: 14),
+            FaIcon(FontAwesomeIcons.music, color: colors.primary, size: 14),
             const SizedBox(width: 10),
             Text(
               user?['musicTitle'] ?? 'استمع للموسيقى',
-              style: TextStyle(color: colors.info, fontWeight: FontWeight.w800, fontSize: 13),
+              style: TextStyle(color: colors.primary, fontWeight: FontWeight.w800, fontSize: 13),
             ),
           ],
         ),
@@ -422,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     placeholder: (context, url) => Shimmer.fromColors(
                       baseColor: colors.border.withOpacity(0.3),
                       highlightColor: colors.border.withOpacity(0.1),
-                      child: Container(color: Colors.white),
+                      child: Container(color: colors.surface),
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: colors.surface,
@@ -481,12 +479,12 @@ class _ProfileScreenState extends State<ProfileScreen>
               onPressed: () => context.pop(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                 elevation: 0,
               ),
-              child: const Text('إغلاق', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              child: Text('إغلاق', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Theme.of(context).colorScheme.onPrimary)),
             ),
             const SizedBox(height: 16),
           ],

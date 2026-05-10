@@ -232,7 +232,13 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> sendMessage(String receiverId, String? message, {String? filePath, String type = 'text'}) async {
+  Future<Map<String, dynamic>> sendMessage(
+    String receiverId,
+    String? message, {
+    String? filePath,
+    String type = 'text',
+    String? replyToId,
+  }) async {
     if (!_authProvider.isAuthenticated) return {'success': false};
     final userId = _authProvider.user!['id'];
 
@@ -242,6 +248,7 @@ class ChatProvider with ChangeNotifier {
         'receiver_id': receiverId,
         'content': message,
         'type': type,
+        if (replyToId != null) 'reply_to_id': replyToId,
       };
 
       final result = filePath != null 

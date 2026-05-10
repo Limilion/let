@@ -46,6 +46,7 @@ class StoriesBar extends StatelessWidget {
                   imageUrl: ApiService.getImageUrl(user?['photo']),
                   isAdd: true,
                   colors: colors,
+                  context: context,
                 ),
                 const SizedBox(width: 10),
                 // Dynamic Stories
@@ -57,6 +58,7 @@ class StoriesBar extends StatelessWidget {
                       userName: item.userName,
                       imageUrl: ApiService.getImageUrl(item.userPhoto),
                       colors: colors,
+                      context: context,
                     ),
                   );
                 }),
@@ -74,6 +76,7 @@ class StoriesBar extends StatelessWidget {
     String? imageUrl,
     bool isAdd = false,
     required CustomColors colors,
+    required BuildContext context,
   }) {
     return SizedBox(
       width: 64,
@@ -151,10 +154,10 @@ class StoriesBar extends StatelessWidget {
                       border: Border.all(color: colors.background, width: 2),
                     ),
                     alignment: Alignment.center,
-                    child: const Icon(
+                    child: Icon(
                       Icons.add_rounded,
                       size: 12,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
               ],

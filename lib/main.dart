@@ -78,14 +78,6 @@ class _MyAppState extends State<MyApp> {
             themeMode: themeProvider.themeMode,
             routerConfig: _router!,
             builder: (context, child) {
-              // Handle overall loading state if needed
-              if (authProvider.loading) {
-                return const Scaffold(
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
               return child!;
             },
           );

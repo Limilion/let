@@ -419,7 +419,9 @@ class _FeedScreenState extends State<FeedScreen> {
                               _isUserFollowing(user)
                               ? colors.surface
                               : colors.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: _isUserFollowing(user)
+                              ? colors.text
+                              : Theme.of(context).colorScheme.onPrimary,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -437,7 +439,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             fontWeight: FontWeight.bold,
                             color: _isUserFollowing(user)
                                 ? colors.text
-                                : Colors.white,
+                                : Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ),
@@ -536,24 +538,28 @@ class _FeedScreenState extends State<FeedScreen> {
   Widget _buildCreateMenuButton(CustomColors colors) {
     return PopupMenuButton<_CreateAction>(
       tooltip: 'إنشاء',
-      color: const Color(0xFF3D3F45),
+      color: colors.surface,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: colors.border.withValues(alpha: 0.2)),
+      ),
       onSelected: _onCreateActionSelected,
-      itemBuilder: (context) => const [
+      itemBuilder: (context) => [
         PopupMenuItem(
           value: _CreateAction.post,
-          child: _MenuRow(icon: FontAwesomeIcons.penToSquare, label: 'منشور'),
+          child: _MenuRow(icon: FontAwesomeIcons.penToSquare, label: 'منشور', colors: colors),
         ),
         PopupMenuItem(
           value: _CreateAction.story,
-          child: _MenuRow(icon: FontAwesomeIcons.images, label: 'قصة'),
+          child: _MenuRow(icon: FontAwesomeIcons.images, label: 'قصة', colors: colors),
         ),
         PopupMenuItem(
           value: _CreateAction.reels,
           child: _MenuRow(
             icon: FontAwesomeIcons.clapperboard,
             label: 'مقطع ريلز',
+            colors: colors,
           ),
         ),
         PopupMenuItem(
@@ -561,17 +567,19 @@ class _FeedScreenState extends State<FeedScreen> {
           child: _MenuRow(
             icon: FontAwesomeIcons.towerBroadcast,
             label: 'بث مباشر',
+            colors: colors,
           ),
         ),
         PopupMenuItem(
           value: _CreateAction.note,
-          child: _MenuRow(icon: FontAwesomeIcons.noteSticky, label: 'ملاحظة'),
+          child: _MenuRow(icon: FontAwesomeIcons.noteSticky, label: 'ملاحظة', colors: colors),
         ),
         PopupMenuItem(
           value: _CreateAction.ai,
           child: _MenuRow(
             icon: FontAwesomeIcons.wandMagicSparkles,
             label: 'الذكاء الاصطناعي',
+            colors: colors,
           ),
         ),
       ],
@@ -616,18 +624,19 @@ class _FeedScreenState extends State<FeedScreen> {
 class _MenuRow extends StatelessWidget {
   final IconData icon;
   final String label;
-  const _MenuRow({required this.icon, required this.label});
+  final CustomColors colors;
+  const _MenuRow({required this.icon, required this.label, required this.colors});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        FaIcon(icon, color: Colors.white, size: 18),
+        FaIcon(icon, color: colors.text, size: 18),
         const SizedBox(width: 12),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colors.text,
             fontWeight: FontWeight.w600,
           ),
         ),

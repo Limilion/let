@@ -84,7 +84,7 @@ class _SearchScreenState extends State<SearchScreen>
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/main', extra: 0);
+              context.go('/main');
             }
           },
         ),
@@ -400,7 +400,7 @@ class _SearchScreenState extends State<SearchScreen>
                         : colors.primary,
                     foregroundColor: isFollowing
                         ? colors.primary
-                        : Colors.white,
+                        : Theme.of(context).colorScheme.onPrimary,
                     elevation: 0,
                     side: isFollowing
                         ? BorderSide(color: colors.primary)
@@ -433,7 +433,7 @@ class _SearchScreenState extends State<SearchScreen>
           Icon(
             icon,
             size: 64,
-            color: colors.textSecondary.withValues(alpha: 0.3),
+            color: colors.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

@@ -169,7 +169,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.close_rounded, color: colors.text),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/main', extra: 4); // Go back to profile tab
+            }
+          },
         ),
         title: Text('تعديل الملف الشخصي', style: TextStyle(color: colors.text, fontWeight: FontWeight.w900, fontSize: 18)),
         actions: [
@@ -179,13 +185,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               onPressed: _isLoading ? null : _handleSave,
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: _isLoading
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('حفظ', style: TextStyle(fontWeight: FontWeight.bold)),
+                ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary)
+                : const Text('حفظ التغييرات', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],

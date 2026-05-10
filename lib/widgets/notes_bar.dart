@@ -34,7 +34,7 @@ class _NotesBarState extends State<NotesBar> {
       return Container(
         height: 120,
         alignment: Alignment.center,
-        child: const CircularProgressIndicator(),
+        child: CircularProgressIndicator(color: colors.primary),
       );
     }
 
@@ -107,34 +107,69 @@ class _NotesBarState extends State<NotesBar> {
                   ),
                 ),
                 Positioned(
-                  top: -5,
+                  top: -15,
                   right: -5,
                   child: ZoomIn(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      constraints: const BoxConstraints(maxWidth: 80),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          constraints: const BoxConstraints(maxWidth: 85),
+                          decoration: BoxDecoration(
+                            color: colors.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        hasNote ? myNote.content : 'ملاحظة...',
-                        style: TextStyle(
-                          color: hasNote ? colors.text : colors.textSecondary.withValues(alpha: 0.5),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (hasNote && myNote.type == 'voice')
+                                Icon(Icons.mic_rounded, color: colors.primary, size: 16)
+                              else if (hasNote && myNote.type == 'video')
+                                Icon(Icons.play_circle_fill_rounded, color: colors.primary, size: 16)
+                              else
+                                Text(
+                                  hasNote ? myNote.content : 'ملاحظة...',
+                                  style: TextStyle(
+                                    color: hasNote ? colors.text : colors.textSecondary.withValues(alpha: 0.5),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                            ],
+                          ),
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
+                        // Cloud "tails"
+                        Padding(
+                          padding: const EdgeInsets.only(right: 15),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(color: colors.surface, shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 4),
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: BoxDecoration(color: colors.surface, shape: BoxShape.circle),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -149,7 +184,7 @@ class _NotesBarState extends State<NotesBar> {
                         shape: BoxShape.circle,
                         border: Border.all(color: colors.surface, width: 2),
                       ),
-                      child: const Icon(Icons.add, color: Colors.white, size: 12),
+                      child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary, size: 12),
                     ),
                   ),
               ],
@@ -196,33 +231,68 @@ class _NotesBarState extends State<NotesBar> {
                   ),
                 ),
                 Positioned(
-                  top: -5,
+                  top: -15,
                   right: -5,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    constraints: const BoxConstraints(maxWidth: 80),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        constraints: const BoxConstraints(maxWidth: 85),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      note.content,
-                      style: TextStyle(
-                        color: colors.text,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (note.type == 'voice')
+                              Icon(Icons.mic_rounded, color: colors.primary, size: 16)
+                            else if (note.type == 'video')
+                              Icon(Icons.play_circle_fill_rounded, color: colors.primary, size: 16)
+                            else
+                              Text(
+                                note.content,
+                                style: TextStyle(
+                                  color: colors.text,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                          ],
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
+                      // Cloud "tails"
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(color: colors.surface, shape: BoxShape.circle),
+                            ),
+                            const SizedBox(width: 4),
+                            Container(
+                              width: 5,
+                              height: 5,
+                              decoration: BoxDecoration(color: colors.surface, shape: BoxShape.circle),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -318,7 +388,7 @@ class _NotesBarState extends State<NotesBar> {
                 backgroundColor: colors.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('مشاركة', style: TextStyle(color: Colors.white)),
+              child: Text('مشاركة', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
             ),
           ],
         ),

@@ -142,7 +142,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> with WidgetsBindi
               child: TextButton(
                 onPressed: _isLoading ? null : _handleUpload,
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2)
                     : const Text(
                         'نشر',
                         style: TextStyle(
@@ -176,7 +176,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> with WidgetsBindi
                           label: const Text('اختر صورة أو فيديو للقصة'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primary,
-                            foregroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           ),
@@ -192,7 +192,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> with WidgetsBindi
                                 aspectRatio: _videoController!.value.aspectRatio,
                                 child: VideoPlayer(_videoController!),
                               )
-                            : const CircularProgressIndicator(color: Colors.white))
+                            : CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary))
                         : Image.file(_mediaFile!, fit: BoxFit.contain),
                   ),
           ),

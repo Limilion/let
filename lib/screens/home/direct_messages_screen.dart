@@ -66,7 +66,7 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/main', extra: 0);
+              context.go('/main');
             }
           },
         ),
@@ -151,6 +151,12 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showCreateGroupDialog,
+        backgroundColor: colors.primary,
+        icon: Icon(Icons.group_add_rounded, color: Theme.of(context).colorScheme.onPrimary),
+        label: Text('مجموعة جديدة', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 
@@ -201,40 +207,43 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: otherUser['photo'] != null
-                        ? CachedNetworkImage(
-                            imageUrl: ApiService.getImageUrl(otherUser['photo'])!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(
-                              baseColor: colors.border.withValues(alpha: 0.1),
-                              highlightColor: colors.surface,
-                              child: Container(color: Colors.white),
-                            ),
-                            errorWidget: (context, url, error) => Icon(
-                              Icons.person_rounded,
-                              color: colors.primary,
-                              size: 30,
-                            ),
-                          )
-                        : Icon(
-                            Icons.person_rounded,
-                            color: colors.primary,
-                            size: 30,
-                          ),
+                    child: conv['isGroup'] == true
+                        ? Icon(Icons.group_rounded, color: colors.primary, size: 30)
+                        : (otherUser['photo'] != null
+                            ? CachedNetworkImage(
+                                imageUrl: ApiService.getImageUrl(otherUser['photo'])!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Shimmer.fromColors(
+                                  baseColor: colors.border.withValues(alpha: 0.1),
+                                  highlightColor: colors.surface,
+                                  child: Container(color: Colors.white),
+                                ),
+                                errorWidget: (context, url, error) => Icon(
+                                  Icons.person_rounded,
+                                  color: colors.primary,
+                                  size: 30,
+                                ),
+                              )
+                            : Icon(
+                                Icons.person_rounded,
+                                color: colors.primary,
+                                size: 30,
+                              )),
                   ),
                 ),
-                Container(
-                  width: 14,
-                  height: 14,
-                  margin: const EdgeInsets.only(right: 2, bottom: 2),
-                  decoration: BoxDecoration(
-                    color: chatProvider.isOnline(otherUser['id'].toString())
-                        ? Colors.green
-                        : Colors.grey.withValues(alpha: 0.4),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: colors.surface, width: 2.5),
+                if (conv['isGroup'] != true)
+                  Container(
+                    width: 14,
+                    height: 14,
+                    margin: const EdgeInsets.only(right: 2, bottom: 2),
+                    decoration: BoxDecoration(
+                      color: chatProvider.isOnline(otherUser['id'].toString())
+                          ? Colors.green
+                          : Colors.grey.withValues(alpha: 0.4),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: colors.surface, width: 2.5),
+                    ),
                   ),
-                ),
               ],
             ),
             const SizedBox(width: 14),
@@ -314,8 +323,8 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen> {
                           ),
                           child: Text(
                             unreadCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
                             ),
@@ -422,6 +431,12 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen> {
     );
   }
 
+  void _showCreateGroupDialog() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ميزة إنشاء المجموعات ستتوفر قريباً!')),
+    );
+  }
+
   Widget _buildEmptyState(dynamic colors) {
     return Center(
       child: Column(
@@ -475,7 +490,7 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen> {
             onPressed: () => context.push('/search'),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),

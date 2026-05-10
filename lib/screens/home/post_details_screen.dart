@@ -163,7 +163,13 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                   color: colors.text,
                   size: 20,
                 ),
-                onPressed: () => context.pop(),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/main');
+                  }
+                },
               ),
               shape: Border(
                 bottom: BorderSide(color: colors.border.withValues(alpha: 0.1)),
