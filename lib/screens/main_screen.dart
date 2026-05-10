@@ -70,7 +70,10 @@ class _MainScreenState extends State<MainScreen> {
     if (_currentIndex == index) return;
 
     if (index == 3) {
-      Provider.of<ChatProvider>(context, listen: false).clearUnreadNotifications();
+      Provider.of<ChatProvider>(
+        context,
+        listen: false,
+      ).clearUnreadNotifications();
     }
 
     setState(() {
@@ -157,13 +160,16 @@ class _MainScreenState extends State<MainScreen> {
                                   clipBehavior: Clip.none,
                                   children: [
                                     FaIcon(
-                                    isSelected ? item.active : item.inactive,
-  size: 18,
-  color: isSelected
-      ? Theme.of(context).colorScheme.onPrimary
-      : colors.textSecondary,
-),
-                                    if (index == 3 && chatProvider.unreadNotifications > 0)
+                                      isSelected ? item.active : item.inactive,
+                                      size: 18,
+                                      color: isSelected
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary
+                                          : colors.textSecondary,
+                                    ),
+                                    if (index == 3 &&
+                                        chatProvider.unreadNotifications > 0)
                                       Positioned(
                                         right: -6,
                                         top: -6,
@@ -172,7 +178,12 @@ class _MainScreenState extends State<MainScreen> {
                                           decoration: BoxDecoration(
                                             color: Colors.red,
                                             shape: BoxShape.circle,
-                                            border: Border.all(color: isSelected ? colors.primary : colors.surface, width: 2),
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? colors.primary
+                                                  : colors.surface,
+                                              width: 2,
+                                            ),
                                           ),
                                           constraints: const BoxConstraints(
                                             minWidth: 12,
