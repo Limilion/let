@@ -26,8 +26,13 @@ jobs:
       - name: Build Web
         run: flutter build web --release --base-href "/let/"
 
-      - name: Copy APK
-        run: cp -r web/apk build/web/
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Prepare APK for deployment
+        run: |
+          mkdir -p build/web/apk
+          cp build/app/outputs/flutter-apk/app-release.apk build/web/apk/LinkUp.apk
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
