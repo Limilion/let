@@ -246,6 +246,7 @@ model Note {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique
   content   String
+  type      String   @default("text") // 'text', 'voice', 'video'
   createdAt DateTime @default(now())
   expiresAt DateTime
 

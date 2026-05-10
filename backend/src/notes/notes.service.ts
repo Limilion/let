@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class NotesService {
   constructor(private prisma: PrismaService) {}
 
-  async createNote(userId: number, content: string) {
+  async createNote(userId: number, content: string, type: string = 'text') {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
@@ -13,12 +13,14 @@ export class NotesService {
       where: { userId },
       update: {
         content,
+        type,
         expiresAt,
         createdAt: new Date(),
       },
       create: {
         userId,
         content,
+        type,
         expiresAt,
       },
     });

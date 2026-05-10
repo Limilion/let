@@ -8,9 +8,13 @@ export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
   @Post()
-  async createNote(@Req() req, @Body('content') content: string) {
+  async createNote(
+    @Req() req, 
+    @Body('content') content: string,
+    @Body('type') type: string = 'text',
+  ) {
     const userId = req.user.id;
-    const note = await this.notesService.createNote(userId, content);
+    const note = await this.notesService.createNote(userId, content, type);
     return { success: true, data: note };
   }
 
