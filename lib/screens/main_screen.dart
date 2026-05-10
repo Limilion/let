@@ -156,12 +156,13 @@ class _MainScreenState extends State<MainScreen> {
                                 child: Stack(
                                   clipBehavior: Clip.none,
                                   children: [
-                                      isSelected ? item.active : item.inactive,
-                                      size: 18,
-                                      color: isSelected
-                                          ? Theme.of(context).colorScheme.onPrimary
-                                          : colors.textSecondary,
-                                    ),
+                                    FaIcon(
+                                    isSelected ? item.active : item.inactive,
+  size: 18,
+  color: isSelected
+      ? Theme.of(context).colorScheme.onPrimary
+      : colors.textSecondary,
+),
                                     if (index == 3 && chatProvider.unreadNotifications > 0)
                                       Positioned(
                                         right: -6,
