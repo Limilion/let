@@ -245,9 +245,12 @@ class _PostCardState extends State<PostCard>
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: colors.surface,
+        border: Border(
+          bottom: BorderSide(color: colors.border.withOpacity(0.5), width: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,9 +359,7 @@ class _PostCardState extends State<PostCard>
                 decoration: BoxDecoration(
                   color: colors.background,
                 ),
-                // Ensure fixed constraints to prevent jumps
                 constraints: BoxConstraints(
-                  minHeight: 200,
                   maxHeight: MediaQuery.of(context).size.height * 0.7,
                 ),
                 child: Stack(
@@ -447,7 +448,7 @@ class _PostCardState extends State<PostCard>
                                         itemBuilder: (context, index) =>
                                             CachedNetworkImage(
                                               imageUrl: mediaUrls[index],
-                                              fit: BoxFit.contain,
+                                              fit: BoxFit.cover,
                                               width: double.infinity,
                                               placeholder: (context, url) =>
                                                   Center(
@@ -504,7 +505,7 @@ class _PostCardState extends State<PostCard>
                                 )
                               : CachedNetworkImage(
                                   imageUrl: mediaUrl ?? mediaUrls.first,
-                                  fit: BoxFit.contain,
+                                  fit: BoxFit.cover,
                                   width: double.infinity,
                                   placeholder: (context, url) => Center(
                                     child: CircularProgressIndicator(
@@ -746,7 +747,7 @@ class _PostCardState extends State<PostCard>
                   colors.primary,
                   () {
                     context.pop();
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('جاري الترجمة بواسطة ذكاء Lettuce...')));
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('جاري الترجمة بواسطة ذكاء LinkUp...')));
                   },
                 ),
                 _buildOptionItem(

@@ -273,7 +273,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         const SizedBox(width: 12),
                         _buildActionIcon(FontAwesomeIcons.shareNodes, colors, () {
                           HapticFeedback.lightImpact();
-                          Share.share('https://let_let.app/user/${user?['username']}');
+                          Share.share('https://linkup.app/user/${user?['username']}');
                         }),
                       ],
                     ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2),
@@ -458,7 +458,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           children: [
             Container(width: 40, height: 4, decoration: BoxDecoration(color: colors.border, borderRadius: BorderRadius.circular(10))),
             const SizedBox(height: 32),
-            Text('رمز Lettuce الخاص بك', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: colors.text)),
+            Text('رمز LinkUp الخاص بك', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: colors.text)),
             const SizedBox(height: 8),
             Text('@${user?['username'] ?? ''}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: colors.textSecondary)),
             const SizedBox(height: 32),
@@ -470,7 +470,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 boxShadow: [BoxShadow(color: colors.primary.withOpacity(0.1), blurRadius: 40)],
               ),
               child: QrImageView(
-                data: 'https://let_flutter.app/user/${user?['id']}',
+                data: 'https://linkup.app/user/${user?['id']}',
                 version: QrVersions.auto,
                 size: 200.0,
                 backgroundColor: Colors.white,

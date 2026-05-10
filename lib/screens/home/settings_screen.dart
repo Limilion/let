@@ -192,7 +192,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleShareApp() async {
     await Share.share(
-      'انضم إلي على Lettuce! تطبيق التواصل الاجتماعي الأفضل 🚀',
+      'انضم إلي على LinkUp! تطبيق التواصل الاجتماعي الأفضل 🚀',
     );
   }
 
@@ -312,7 +312,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: Icons.mail_outline,
                 label: 'اتصل بنا',
                 color: Colors.red,
-                onTap: () => _launchUrl('mailto:support@lettuce.app'),
+                onTap: () => _launchUrl('mailto:support@linkup.app'),
                 colors: colors,
               ),
             ], colors),
@@ -332,7 +332,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 label: 'قيم التطبيق',
                 color: Colors.amber,
                 onTap: () => _launchUrl(
-                  'https://play.google.com/store/apps/details?id=com.lettuce.app',
+                  'https://play.google.com/store/apps/details?id=com.linkup.app',
                 ),
                 colors: colors,
               ),
@@ -364,7 +364,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Lettuce v1.0.0 (Build 100)',
+              'LinkUp v1.0.0 (Build 100)',
               style: TextStyle(
                 color: colors.textSecondary,
                 fontSize: 12,

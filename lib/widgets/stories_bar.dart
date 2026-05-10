@@ -93,10 +93,10 @@ class StoriesBar extends StatelessWidget {
                     color: isAdd ? colors.surface : null,
                     gradient: isAdd
                         ? null
-                        : LinearGradient(
-                            colors: colors.primaryGradient,
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                        : const LinearGradient(
+                            colors: [Color(0xFF34D399), Color(0xFF10B981), Color(0xFF047857)],
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
                           ),
                     border: isAdd
                         ? Border.all(

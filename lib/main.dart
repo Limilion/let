@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
           _router ??= AppRouter.createRouter(authProvider);
           
           return MaterialApp.router(
-            title: 'Lettuce',
+            title: 'LinkUp',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.getTheme(false),
             darkTheme: AppTheme.getTheme(true),

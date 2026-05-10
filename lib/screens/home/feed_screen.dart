@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -113,81 +114,116 @@ class _FeedScreenState extends State<FeedScreen> {
 
     return Scaffold(
       backgroundColor: colors.background,
-      extendBodyBehindAppBar: false,
-      body: Stack(
-        children: [
-          RefreshIndicator(
-            onRefresh: () => _refreshFeed(postProvider, storyProvider),
-            color: colors.primary,
-            backgroundColor: colors.surface,
-            child: (postProvider.loading && postProvider.posts.isEmpty)
-                ? ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: 4,
-                    itemBuilder: (_, __) => const PostShimmer(),
-                  )
-                : postProvider.error != null && postProvider.posts.isEmpty
-                ? _buildErrorView(colors, postProvider)
-                : ListView.builder(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
-                    ),
-                    cacheExtent: 100, // Reduced to optimize memory for videos
+      body: RefreshIndicator(
+        onRefresh: () => _refreshFeed(postProvider, storyProvider),
+        color: colors.primary,
+        backgroundColor: colors.surface,
+        displacement: MediaQuery.of(context).padding.top + 60,
+        child: CustomScrollView(
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            // Glassmorphic SliverAppBar
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              flexibleSpace: ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    color: colors.surface.withOpacity(0.85),
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 62,
-                      bottom: 120,
+                      top: MediaQuery.of(context).padding.top,
+                      bottom: 8,
+                      left: 16,
+                      right: 16,
                     ),
-                    itemCount: feedPosts.isEmpty
-                        ? 1
-                        : feedPosts.length +
-                              2 +
-                              (postProvider.suggestedUsers.isNotEmpty &&
-                                      feedPosts.length >= 3
-                                  ? 1
-                                  : 0),
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return Column(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => context.push('/settings'),
+                          child: Icon(Icons.menu_rounded, color: colors.text, size: 28),
+                        ),
+                        Text(
+                          'الرئيسية',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                            color: colors.text,
+                          ),
+                        ),
+                        Row(
                           children: [
-                            StoriesBar(
-                              onStoryPress: (story) {
-                                context.push(
-                                  '/story-viewer',
-                                  extra: {
-                                    'userWithStories': story,
-                                    'initialIndex': 0,
-                                  },
-                                );
-                              },
-                              onAddStory: () => context.push('/create-story'),
-                            ),
-                            const SizedBox(height: 4),
-                            if (feedPosts.isEmpty) ...[
-                              const SizedBox(height: 40),
-                              _buildEmptyView(colors),
-                            ],
+                            _buildCreateMenuButton(colors),
+                            const SizedBox(width: 4),
+                            _buildHeaderIconButton(Icons.search_rounded, colors, () => context.push('/search')),
+                            _buildNotificationButton(colors, notificationProvider),
                           ],
-                        );
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              toolbarHeight: 60,
+            ),
+            
+            // Stories and Content
+            if (postProvider.loading && postProvider.posts.isEmpty)
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, __) => const PostShimmer(),
+                  childCount: 4,
+                ),
+              )
+            else if (postProvider.error != null && postProvider.posts.isEmpty)
+              SliverFillRemaining(
+                child: _buildErrorView(colors, postProvider),
+              )
+            else ...[
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                      child: StoriesBar(
+                        onStoryPress: (story) {
+                          context.push(
+                            '/story-viewer',
+                            extra: {'userWithStories': story, 'initialIndex': 0},
+                          );
+                        },
+                        onAddStory: () => context.push('/create-story'),
+                      ),
+                    ),
+                    if (feedPosts.isEmpty) ...[
+                      const SizedBox(height: 40),
+                      _buildEmptyView(colors),
+                    ],
+                  ],
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.only(bottom: 120),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      bool showSuggestions = postProvider.suggestedUsers.isNotEmpty && feedPosts.length >= 3;
+                      
+                      if (showSuggestions && index == 3) {
+                        return _buildSuggestedUsers(postProvider.suggestedUsers, colors);
                       }
-
-                      // Logic to insert suggested users after 3 posts
-                      int postIndex = index - 1;
-                      bool showSuggestions =
-                          postProvider.suggestedUsers.isNotEmpty &&
-                          feedPosts.length >= 3;
-
-                      if (showSuggestions && postIndex == 3) {
-                        return _buildSuggestedUsers(
-                          postProvider.suggestedUsers,
-                          colors,
-                        );
-                      }
-
-                      if (showSuggestions && postIndex > 3) {
+                      
+                      int postIndex = index;
+                      if (showSuggestions && index > 3) {
                         postIndex--;
                       }
-
+                      
                       if (postIndex < feedPosts.length) {
                         final post = feedPosts[postIndex];
                         return PostCard(
@@ -197,63 +233,25 @@ class _FeedScreenState extends State<FeedScreen> {
                           onComment: (p) => context.push('/post-details', extra: p),
                         );
                       }
+                      
                       if (postIndex >= feedPosts.length) {
                         return _isLoadingMore
                             ? _buildLoadMoreShimmer()
                             : _buildFeedFooter(colors, postProvider, feedPosts);
                       }
+                      return null;
                     },
+                    childCount: feedPosts.isEmpty
+                        ? 0
+                        : feedPosts.length +
+                            1 + // For footer
+                            (postProvider.suggestedUsers.isNotEmpty && feedPosts.length >= 3 ? 1 : 0),
                   ),
-          ),
-
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              color: colors.surface,
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 8,
-                bottom: 10,
-                left: 16,
-                right: 16,
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () => context.push('/settings'),
-                    child: Icon(
-                      Icons.menu_rounded,
-                      color: colors.text,
-                      size: 24,
-                    ),
-                  ),
-                  Text(
-                    'الرئيسية',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: colors.text,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      _buildCreateMenuButton(colors),
-                      const SizedBox(width: 4),
-                      _buildHeaderIconButton(
-                        Icons.search_rounded,
-                        colors,
-                        () => context.push('/search'),
-                      ),
-                      _buildNotificationButton(colors, notificationProvider),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+            ],
+          ],
+        ),
       ),
     );
   }

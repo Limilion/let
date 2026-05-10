@@ -92,7 +92,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                         const SizedBox(height: 32),
                         const Text(
-                          'Lettuce',
+                          'LinkUp',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 48,
@@ -148,7 +148,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   // Footer text
                   Center(
                     child: Text(
-                      'بواسطة Lettuce AI Team',
+                      'بواسطة LinkUp Team',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 12,
